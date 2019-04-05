@@ -29,12 +29,30 @@ all_series = read_csv(here("data/series_from_imdb.csv.zip"),
 glimpse(all_series)
 
 episodes = all_series %>% 
-    filter(series_name == "Stranger Things") 
+    filter(series_name %in% c("Stranger Things", "Friends", "Dark", "Vikings", "The Office")) 
 
 glimpse(episodes)
 ```
 
 Estamos interessados nas variáveis `UserRating` e `UserVotes`, principalmente.
+
+## Questão 1: As séries com maior número de episódios/temporadas tem melhores avaliações que as com menor número?
+```{r read}
+all_series %>%
+  group_by(series_name) %>%
+  summarize(episodes = n(), rating = mean(UserRating)) %>%
+  ggplot(aes(x = episodes, y = rating)) +
+  geom_point() +
+  labs(title = "Rating das Séries x Num de Episodios")
+
+episodes %>% 
+  group_by(series_name, season) %>%
+  summarize(rating = mean(UserRating)) %>% 
+  ggplot(aes(x = as.factor(season), y = rating)) +
+  geom_point() +
+  facet_grid(. ~ series_name) +
+  labs(title = "Rating das Temporadas x Num de Episodios")
+```
 
 ## Quais os valores que existem de notas? 
 
