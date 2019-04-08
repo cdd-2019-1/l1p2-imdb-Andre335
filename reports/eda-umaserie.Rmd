@@ -1,11 +1,11 @@
 ---
-title: "EDA Stranger Things"
+title: "EDA IMDB Series"
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -18,7 +18,7 @@ theme_set(theme_bw())
 
 ## Objetivo
 
-Explorar as avaliações dos episódios da série Stranger Things. Houve duas temporadas: quais foram os melhores episódios? A melhor temporada?
+Explorar as avaliações dos episódios de algumas séries como Stranger Things, Friends, Dark, Vikings e The Office. Para algumas análises foi usado dados de todas as séries.
 
 Ler os dados:
 
@@ -37,6 +37,9 @@ glimpse(episodes)
 Estamos interessados nas variáveis `UserRating` e `UserVotes`, principalmente.
 
 ## Questão 1: As séries com maior número de episódios/temporadas tem melhores avaliações que as com menor número?
+
+  Pode-se ver pelo gráfico a abaixo que a dispersão dos pontos do número de episódios da série por rating é muito grande e mostra que não existe uma relação entre essas variáveis. Isso pode ser explicado pelo fato de o rating dos episódios das séries serem relativos também dependendo da aceitação da audiência.
+
 ```{r read}
 all_series %>%
   group_by(series_name) %>%
@@ -44,7 +47,11 @@ all_series %>%
   ggplot(aes(x = episodes, y = rating)) +
   geom_point() +
   labs(title = "Rating das Séries x Num de Episodios")
+```
 
+  Já com o gráfico abaixo pode-se concluir algo parecido baseado nas 5 séries usadas, temos uma série como Friends que tem 10 temporadas e uma média menor que Stranger Things que só tiveram 2 temporadas até o momento, ou seja conclui que o Rating de uma série não tem relação com o número de episódios ou temporadas da mesma.
+
+```{r}
 episodes %>% 
   group_by(series_name, season) %>%
   summarize(rating = mean(UserRating)) %>% 
@@ -53,70 +60,24 @@ episodes %>%
   facet_grid(. ~ series_name) +
   labs(title = "Rating das Temporadas x Num de Episodios")
 ```
+## Uma pergunta que fica a partir da análise acima seria: Qual fator seria mais significante e que levariam ao Rating da série ser maior ou menor?
+  Respondendo a essa pergunta seria preciso analisar o que aconteceu na série em um episódio ou em uma temporada para entender o que poderia ter feito o rating subir ou descer, seria importante estudar a reação da audência ao assistir cada episódio, por exemplo, episódios que contem uma história em paralelo com o que está acontecendo de principal em uma temporada pode ter um rating menor
+por não ser considerado relevante pela audiência, um fato acontecido em um episódio específico da série que leva a uma reação
+negativa da audência iria implicar também num rating menor do episódio e isso pode impactar no rating da temporada como um todo.
 
-## Quais os valores que existem de notas? 
-
-```{r}
-episodes %>% 
-  mutate(season = as.character(season)) %>% 
-  ggplot(mapping = aes(x = season, y = UserRating)) + 
-  geom_point()
+## Questão 2: Séries com poucas temporadas (menos ou igual a 3 temporadas) tem rating alto (acima de 7) ou baixo (abaixo de 7)? 
+  Como pode-se ver com o gráfico abaixo a maior parte das séries de 3 temporadas ou menos tem rating acima de 7, oque iria de encontro com minha ideia inicial de que como a série tem poucas temporadas ela provavelmente não era tão boa e pode ter sido cancelada cedo. Podemos ver que se tem uma parte das séries de apenas uma temporada que tem rating abaixo de 7, essas podem ser as séries que foram canceladas mais cedo ou apenas tiveram uma primeira temporada ruim. Respondendo a pergunta, séries com poucas temporadas tem rating acima de 7.
   
-```
-
-E por faixas de valor?
-
 ```{r}
-episodes %>% 
-  mutate(season = as.character(season)) %>% 
-  ggplot(mapping = aes(x = UserRating)) + 
-  geom_histogram(binwidth = 0.5, 
-                 boundary = 6,
-                 color = "black", 
-                 fill = "salmon") + 
-  geom_rug()
-
+all_series %>% 
+  group_by(series_name, season) %>% 
+  summarise(rating = mean(UserRating)) %>% 
+  summarise(seasons = n_distinct(season), rating = mean(rating)) %>% 
+  filter(seasons <= 3) %>% 
+  ggplot(aes(x = as.factor(seasons), y = rating)) +
+  geom_violin() +
+  labs(title = "Rating das Séries x Num de Temporadas")
 ```
 
-## Quais valores existem para número de votos?
-
-```{r}
-episodes %>% 
-  mutate(season = as.character(season)) %>% 
-  ggplot(mapping = aes(x = season, y = UserVotes)) + 
-  geom_point()
-```
-
-```{r}
-episodes %>% 
-  mutate(season = as.character(season)) %>% 
-  ggplot(mapping = aes(x = UserVotes)) + 
-  geom_histogram(binwidth = 1000, 
-                 boundary = 10000,
-                 color = "black", 
-                 fill = "darkorange") + 
-  geom_rug()
-```
-
-Temos um episódio bem mais avaliado que os demais.
-
-
-## Qual é esse episódio tão mal avaliado?
-
-```{r}
-episodes %>% 
-  mutate(season = as.character(season)) %>% 
-  ggplot(mapping = aes(x = series_ep, y = UserRating, color = season)) + 
-  geom_line()
-```
-
-E qual aquele com mais avaliações?
-
-```{r}
-episodes %>% 
-  mutate(season = as.character(season)) %>% 
-  ggplot(mapping = aes(x = series_ep, y = UserVotes, color = season)) + 
-  geom_line()
-```
-
-Alguma coisa aconteceu no episódio 15...
+## A partir da análise anterior resta uma pergunta: porquê séries de rating alto teriam poucas temporadas?
+  Considerando que partes dessas séries ainda estão sendo gravadas a resposta é um tanto quanto óbivia, como a série ainda está sendo gravadas, temporadas novas ainda estão por vir. Em relação as que já pararam de ser gravadas, pode se ter algumas explicações, apesar da aceitação da série pela audiência ser boa, pode se ter tido problemas com a gravadora ou falta de investimento para a continuação da série ou a série apenas pode ter finalizado a história. Então, respondendo a pergunta, creio que a maioria das séries que tem poucas temporadas com rating alto ainda estão sendo produzidas.
