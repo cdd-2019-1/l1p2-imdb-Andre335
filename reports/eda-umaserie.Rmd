@@ -60,6 +60,7 @@ episodes %>%
   facet_grid(. ~ series_name) +
   labs(title = "Rating das Temporadas x Num de Episodios")
 ```
+
 ## Uma pergunta que fica a partir da análise acima seria: Qual fator seria mais significante e que levariam ao Rating da série ser maior ou menor?
   Respondendo a essa pergunta seria preciso analisar o que aconteceu na série em um episódio ou em uma temporada para entender o que poderia ter feito o rating subir ou descer, seria importante estudar a reação da audência ao assistir cada episódio, por exemplo, episódios que contem uma história em paralelo com o que está acontecendo de principal em uma temporada pode ter um rating menor
 por não ser considerado relevante pela audiência, um fato acontecido em um episódio específico da série que leva a uma reação
